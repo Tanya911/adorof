@@ -10,10 +10,8 @@ __dscription__ 		= """Основной модуль работы по курсу
 
 import sys
 
-import sqlite3 as lite
-
-import numpy as np
-import numpy.random as rnd
+import time as tm
+import database as db
 
 ## Информация об использовании
 def usage( ) :
@@ -30,9 +28,8 @@ def attach( module, procedure ) :
 ## Пропускаем ошибку выше
 		raise e
 
-def get_dataset( name ):
-## Загружаем данные из базы
-	return np.empty( shape = (0,3), dtype = np.float )
+def parse_user_params( argv ) :
+	return { "dataset" : argv[ 1 ], "K" : 5 }
 
 ## Ветка основного модуля
 if __name__ == '__main__' :
@@ -40,32 +37,41 @@ if __name__ == '__main__' :
 	if len( sys.argv ) < 2 :
 		exit( usage( ) )
 
-	dataset_name = sys.argv[ 1 ]
+## Проверяем соединение
+	db.test( )
 
-## Подсоединяемся к базе данных
-	with lite.connect( 'db/main.db' ) as con :
-## Тестовый сценарий
-		cur = con.cursor( )
-		cur.execute( """SELECT SQLITE_VERSION( )""" )
-		data = cur.fetchone( )
-## Вывод
-		print "SQLite version: %s" % data
+## Определяем параметры введённые пользоватлем
+	user_params = parse_user_params( sys.argv )
 
-## Подсоединяем модули на лету
-	fill_missing = attach( "missing_data", "pass_through" )
+## Подсоединяем модули на лету (здесь можно реализовать
+##  выбор алгоритма пользователем, но это потом!)
+	fill_missing = attach( "missing_data", "do_nothing" )
 	count_classes = attach( "class_count", "user_specified" )
 	seed = attach( "initialization", "basic_seed" )
 	cluster = attach( "clustering", "dumb_clustering" )
-	
-	user_params = { "K" : 5 }
 
 ## Основная работа модуля
-	data_raw = get_dataset( dataset_name )
-	data = fill_missing( data_raw, **user_params )
-	class_number = count_classes( data, **user_params )
-	class_seed = seed( data, class_number, **user_params )
-
-	result = cluster( data, class_number, class_seed )
-	print result
+	try:
+## Получаем данные из базы
+		data_id, data_raw = db.get_dataset( name = user_params[ "dataset" ] )
+## Обрабатываем числовые данные алгоритмами
+## Пополняем пропуски
+		data = fill_missing( data_raw, **user_params )
+## Считаем классы
+		class_number = count_classes( data, **user_params )
+## Выбираем начальное разбиение
+		class_seed = seed( data, class_number, **user_params )
+## Кластеризуем
+		result = cluster( data, class_number, class_seed )
+## Собираем информацию для размещения в БД
+		pass
+## Сохраянем результаты в базе
+		result_id = db.store_result( data_id, result )
+## Вызываем модуль отрисовки
+		# execfile( 'report.py', result_id )
+	except Exception, e:
+## Обработка исключений: просто выводи и выходим с кодом -2
+		print e
+		exit( -2 )
 
 ## КОНЕЦ

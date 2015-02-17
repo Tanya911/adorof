@@ -3,5 +3,5 @@
 
 import numpy as np
 
-def dumb_clustering( data, classes, seed  ):
+def dumb_clustering( data, classes, seed  ) :
 	return seed
