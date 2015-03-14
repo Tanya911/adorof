@@ -68,7 +68,7 @@ class partition_criterion(object):
 ## Implement average linkage
 	def I1( self, pi ) :
 ## Atomic or empty classes must be heavily penalized
-		if np.any( [ len( i ) < 2 for i in pi ] ) : return -np.inf
+		if np.any( [ len( i ) < 2 for i in pi ] ) : return 0 ##-np.inf
 		return np.mean( np.array( [ np.mean( self.__pdist[ np.ix_( i, i ) ],
 			dtype = np.float64 )* len( i ) / ( len( i ) - 1.0 ) for i in pi ] ) )
 	def I2( self, pi ) :
