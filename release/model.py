@@ -13,7 +13,6 @@ import mpl_toolkits.mplot3d
 
 import numpy as np
 import FillGaps as fg
-import m_local as algo
 
 ################################################################################
 class model( object ):
@@ -31,7 +30,7 @@ class model( object ):
         pass
 ################################################################################
     def has_data( self ) :
-        return not self.__dataset.isempty( )
+        return self.__dataset is not None
     def load_datafile( self, fin ) :
         self.__dataset = np.genfromtxt( fin.name, delimiter = ',' )
         self.__original = self.__dataset.copy( )

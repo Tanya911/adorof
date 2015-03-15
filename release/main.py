@@ -102,7 +102,7 @@ class Application( tk.Frame ):
     def __cmd_menu_cluster_run( self ) :
         pass
     def __display_show_datafile( self ) :
-        if not self.__moedl.has_data( ) :
+        if not self.__model.has_data( ) :
             self.__display_error( "NODATA" )
             return
 ## Show basic info on the loaded datafile
