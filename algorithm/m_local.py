@@ -67,7 +67,8 @@ class partition_criterion(object):
 		np.fill_diagonal( self.__pdist, 0 )
 ## Implement average linkage
 	def I1( self, pi ) :
-## Atomic or empty classes must be heavily penalized
+## Atomic or empty classes must be heavily penalized, but not so much as to 
+##  inhibit any data point transfers.
 		if np.any( [ len( i ) < 2 for i in pi ] ) : return 0 ##-np.inf
 		return np.mean( np.array( [ np.mean( self.__pdist[ np.ix_( i, i ) ],
 			dtype = np.float64 )* len( i ) / ( len( i ) - 1.0 ) for i in pi ] ) )
@@ -117,7 +118,7 @@ class s_local(object) :
 			centroid = np.mean( self.__data[ pi[ dst ] ], axis = 0 )
 ## Compute the distances to the centroid : O( n )
 			distances = cdist( [ centroid ], self.__data[ pi[ src ] ] )
-## Find s nearest neighbours using introselect ( min-heap + quickselect ): O( n )
+## Find s nearest neighbours using introselect ( min-heap + quickselect ): O( n log s)
 			sNN = set( argtop( distances[ 0 ], s )[ :s ] )
 ## Save the original classes (copies) 
 			S0, D0 = list( pi[ src ] ), list( pi[ dst ] )
