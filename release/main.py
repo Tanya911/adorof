@@ -107,9 +107,9 @@ class Application( tk.Frame ):
             return
 ## Show basic info on the loaded datafile
         filename, n, attr = self.__model.get_data_info( )
-        tk.Label( self.__wnd, text = "Загруженны данные из файла %s" % filename ).grid( row = 0, sticky = tk.W )
-        tk.Label( self.__wnd, text = "Количество объектов: %d" % n ).grid( row = 1, sticky = tk.W )
-        tk.Label( self.__wnd, text = "Количество признаков: %d" % attr ).grid( row = 2, sticky = tk.W )
+        tk.Label( self.__wnd, text = u"Загруженны данные из файла %s" % filename ).grid( row = 0, sticky = tk.W )
+        tk.Label( self.__wnd, text = u"Количество объектов: %d" % n ).grid( row = 1, sticky = tk.W )
+        tk.Label( self.__wnd, text = u"Количество признаков: %d" % attr ).grid( row = 2, sticky = tk.W )
 ## Enable menu options
         self.__menuitems[ 'show' ].entryconfig( 0, state = tk.ACTIVE )
         self.__menubar.entryconfig( 2,state = tk.ACTIVE )
