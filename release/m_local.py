@@ -165,7 +165,6 @@ class s_local(object) :
 			if len( pi[ src ] ) >= s + 2 :
 ##  begin the s-local point transfer cycle
 				I1 = self.__cycle( pi, src, s = s, I0 = I0 )
-				print src, I0, I1
 ## If the partition has been modified, restart
 				if I1 > I0 :
 					I0 = I1 ; src = 0

@@ -31,8 +31,17 @@ def sim_ratio( partition, sim, *wargs, **kwargs ) :
 	return ( sim_within( partition, sim, *wargs, **kwargs ) / 
 		sim_between( partition, sim, *wargs, **kwargs ) )
 
+def sim_diff( partition, sim, *wargs, **kwargs ) :
+	return ( sim_within( partition, sim, *wargs, **kwargs ) - 10 * 
+		sim_between( partition, sim, *wargs, **kwargs ) )
+
+def sim_diff_ratio( partition, sim, *wargs, **kwargs ) :
+	I1 = sim_within( partition, sim, *wargs, **kwargs )
+	I2 = sim_between( partition, sim, *wargs, **kwargs )
+	return ( I1 - 10 * I2 ) / ( I1 + 10 * I2 )
+
 def sim_within( partition, sim, *wargs, **kwargs ) :
-	if np.any( [ len( i ) < 2 for i in partition ] ) : return 0 ##-np.inf
+	# if np.any( [ len( i ) < 2 for i in partition ] ) : return 0 ##-np.inf
 	return np.mean( [ __sim_AA( sim, I ) for I in partition ], dtype = np.float64 )
 
 def sim_between( partition, sim, *wargs, **kwargs ) :
