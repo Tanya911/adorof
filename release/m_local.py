@@ -81,7 +81,7 @@ class partition_criterion(object):
 	def I2( self, pi ) :
 		if np.any( [ len( i ) < 2 for i in pi ] ) : return -np.inf
 		return np.mean( [ np.mean( self.__pdist[ np.ix_( i, j ) ] )
-			for i, j in comb( pi, 2 ) ] ) * len( pi ) / ( len( pi ) - 1.0 )
+			for i, j in comb( pi, 2 ) ] )
 	def __call__( self, pi ) :
 		return self.I1( pi ) / self.I2( pi )
 
@@ -114,8 +114,8 @@ class s_local(object) :
 		self.__crit = crit
 ## A basic step of the s-local optimisation procedure
 	def __xfer( self, pi, src, dst, s = 1, I0 = None ) :
-		if I0 is None :
-			I0 = self.__crit( pi )
+		# if I0 is None :
+			# I0 = self.__crit( pi )
 ## There is no point in shuffling the data points withing the same class
 		if src == dst : return I0
 ## Keep moving batches of s data points until convergence
@@ -142,8 +142,8 @@ class s_local(object) :
 ## The partition is updated (or not) automatically
 		return I0
 	def __cycle( self, pi, src, s = 1, I0 = None ) :
-		if I0 is None :
-			I0 = self.__crit( pi )
+		# if I0 is None :
+			# I0 = self.__crit( pi )
 ## a full cycle through the classes
 		dst = 0
 ## Pick the class to modify. If we fall off the array, this means stabilization has occurred
@@ -157,14 +157,15 @@ class s_local(object) :
 			I0 = I1 ; dst = 0
 		return I0
 	def s_local( self, pi, s = 1, I0 = None ) :
-		if I0 is None :
-			I0 = self.__crit( pi )
+		# if I0 is None :
+			# I0 = self.__crit( pi )
 		src = 0
 		while src < len( pi ) :
 ## If the class is of sufficient volume ( the least volume is 2 points )
 			if len( pi[ src ] ) >= s + 2 :
 ##  begin the s-local point transfer cycle
 				I1 = self.__cycle( pi, src, s = s, I0 = I0 )
+				print src, I0, I1
 ## If the partition has been modified, restart
 				if I1 > I0 :
 					I0 = I1 ; src = 0
