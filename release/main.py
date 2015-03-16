@@ -84,7 +84,7 @@ class Application( tk.Frame ):
         self.__display_show_datafile( )
         fin.close( )
     def __cmd_menu_data_save( self ) :
-        pass
+        self.__model.export_clustering_report( )
     def __cmd_menu_show_view_original( self ) :
         plt = figure_window( tk.Toplevel( self ), title = u"Исходные данные", modal = True )
         fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )

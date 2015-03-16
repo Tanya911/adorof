@@ -9,7 +9,7 @@ __dscription__      = """Основной вычислительный моду�
 ##########################################################################################
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plotter
-
+import sys
 import numpy as np
 import FillGaps as fg
 
@@ -55,6 +55,40 @@ class model( object ):
         self.__name = fin.name
         self.__ready_for_clustering = False
         self.__current_partition = list( )
+	def export_clustering_report( self, fin ) :
+        if fin is None : return
+        sys.setdefaultencoding('utf-8')
+# Object - class dictionary
+        obj_class = {}
+        for i in range(len(self.__current_partition)):
+            cl = self.__current_partition[i]
+            for j in range(len(cl)):
+                obj_class[cl[j]]=i
+## Write original data (from datafile)
+        with open('results.csv', 'w') as fp:
+            fp.writelines('Исходные данные\n'.encode('utf-8'))
+            for member in range(len(self.__original[0])):
+                fp.write('   x{:d};'.format(member+1))
+            fp.write('\n')
+            for i in self.__original:
+                for j in i:
+                    fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
+            fp.write('\n')
+### Write results of clustering
+        fp.write('Параметры кластеризации\n'.encode('utf-8'))
+        fp.write(('Количество кластеров: {:1d}\n.'.format(self.__num_classes)).encode('utf-8'))
+        if (self.__clust_criterion == "sim_diff"):
+            fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне)').encode('utf-8'))
+        else:
+            fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме').encode('utf-8'))
+        fp.write(('Параметр альфа: {:.2f}\n.'.format(self.self.__alpha)).encode('utf-8'))
+        fp.write(('Параметр p: {:.2f}\n.'.format(self.self.__p)).encode('utf-8'))
+        fp.write('Данные кластеризации (с заполненными пропусками)\n'.encode('utf-8'))
+        for i in range(len(self.__dataset)):
+            for j in self.__dataset[i]:
+                fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
+                fp.write(str(obj_class[i]))
+            fp.write('\n')
     def __call__( self ) :
         return self.__dataset
     def get_data_info( self ) :
