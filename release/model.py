@@ -75,13 +75,13 @@ class model( object ):
         fp.write('\n')
 ### Write results of clustering
         fp.write('Параметры кластеризации\n'.encode('utf-8'))
-        fp.write(('Количество кластеров: {:1d}\n.'.format(self.__num_classes)).encode('utf-8'))
+        fp.write(('Количество кластеров: {:1d}.\n'.format(self.__num_classes)).encode('utf-8'))
         if (self.__clust_criterion == "sim_diff"):
-            fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне)').encode('utf-8'))
+            fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне).\n').encode('utf-8'))
         else:
-            fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме').encode('utf-8'))
-        fp.write(('Параметр альфа: {:.2e}\n.'.format( self.__alpha)).encode('utf-8'))
-        fp.write(('Параметр p: {:.2e}\n.'.format( self.__p)).encode('utf-8'))
+            fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме.\n').encode('utf-8'))
+        fp.write(('Параметр альфа: {:.2f}.\n'.format( self.__alpha)).encode('utf-8'))
+        fp.write(('Параметр p: {:.2f}.\n'.format( self.__p)).encode('utf-8'))
         fp.write('Данные кластеризации (с заполненными пропусками)\n'.encode('utf-8'))
         for i in range(len(self.__dataset)):
             for j in self.__dataset[i]:
