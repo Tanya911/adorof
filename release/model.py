@@ -9,7 +9,6 @@ __dscription__      = """Основной вычислительный моду�
 ##########################################################################################
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plotter
-import sys
 import numpy as np
 import FillGaps as fg
 
@@ -55,9 +54,8 @@ class model( object ):
         self.__name = fin.name
         self.__ready_for_clustering = False
         self.__current_partition = list( )
-	def export_clustering_report( self, fin ) :
-        if fin is None : return
-        sys.setdefaultencoding('utf-8')
+    def export_clustering_report( self, fp ) :
+        if fp is None : return
 # Object - class dictionary
         obj_class = {}
         for i in range(len(self.__current_partition)):
@@ -65,15 +63,16 @@ class model( object ):
             for j in range(len(cl)):
                 obj_class[cl[j]]=i
 ## Write original data (from datafile)
-        with open('results.csv', 'w') as fp:
-            fp.writelines('Исходные данные\n'.encode('utf-8'))
-            for member in range(len(self.__original[0])):
-                fp.write('   x{:d};'.format(member+1))
+        # with open('results.csv', 'w') as fp:
+        fp.writelines(u'Исходные данные\n')
+        for member in range(len(self.__original[0])):
+            fp.write('\tx{:d};'.format(member+1))
+        fp.write('\n')
+        for i in self.__original:
+            for j in i:
+                fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
             fp.write('\n')
-            for i in self.__original:
-                for j in i:
-                    fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
-            fp.write('\n')
+        fp.write('\n')
 ### Write results of clustering
         fp.write('Параметры кластеризации\n'.encode('utf-8'))
         fp.write(('Количество кластеров: {:1d}\n.'.format(self.__num_classes)).encode('utf-8'))
@@ -81,13 +80,12 @@ class model( object ):
             fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне)').encode('utf-8'))
         else:
             fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме').encode('utf-8'))
-        fp.write(('Параметр альфа: {:.2f}\n.'.format(self.self.__alpha)).encode('utf-8'))
-        fp.write(('Параметр p: {:.2f}\n.'.format(self.self.__p)).encode('utf-8'))
+        fp.write(('Параметр альфа: {:.2e}\n.'.format( self.__alpha)).encode('utf-8'))
+        fp.write(('Параметр p: {:.2e}\n.'.format( self.__p)).encode('utf-8'))
         fp.write('Данные кластеризации (с заполненными пропусками)\n'.encode('utf-8'))
         for i in range(len(self.__dataset)):
             for j in self.__dataset[i]:
-                fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
-                fp.write(str(obj_class[i]))
+                fp.write(str.format("{0:.3f}", j).replace('.',',')+';'+str(obj_class[i])+';')
             fp.write('\n')
     def __call__( self ) :
         return self.__dataset
@@ -97,18 +95,21 @@ class model( object ):
     def __prepare_data( self, original = False ) :
 ## Fill missing values if necessary
         data = self.__original.copy( )
-        missing_mask = np.full( data.shape[ 0 ], False, np.bool)
+        missing_mask = np.any( np.isnan( data ), axis = 1 )
         if not original :
-            missing_mask = np.any( np.isnan( data ), axis = 1 )
             if np.any( missing_mask ) :
                 data = fg.fill_missing( data )
 ## Prepare data for plottting
         if data.shape[ 1 ] > 3 :
-## Do the PCA
-            mu = np.mean( data, axis = 0 )
-            sigma = np.std( data, axis = 0 )
-            u, _, v = np.linalg.svd( ( data - mu ) / sigma )
-            d3d = np.dot( data, v[:, :3] )
+            if original and np.any( missing_mask ) :
+## Take the first three dimensions
+                d3d = data[:,:3]
+            else :
+## Do the projection onto the 
+                mu = np.mean( data, axis = 0 )
+                sigma = np.std( data, axis = 0 )
+                u, _, v = np.linalg.svd( ( data - mu ) / sigma )
+                d3d = np.dot( data, v[:, :3] )
         else :
             d3d = np.zeros( ( data.shape[ 0 ], 3 ), np.float )
             d3d[ :, :data.shape[ 1 ] ] = data

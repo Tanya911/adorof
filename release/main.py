@@ -9,6 +9,8 @@ __version__         = "0.9"
 __dscription__      = """Основной модуль работы по курсу "Структурно-классификационные методы интеллектуального анализа данных и прогнозирования в слабо формализованных системах" """
 
 import sys
+reload(sys)
+sys.setdefaultencoding( 'utf-8' )
 import time as tm
 
 try :
@@ -83,8 +85,10 @@ class Application( tk.Frame ):
         self.__model.load_datafile( fin )
         self.__display_show_datafile( )
         fin.close( )
+        self.__menuitems[ 'data' ].entryconfig( 1, state = tk.ACTIVE )
     def __cmd_menu_data_save( self ) :
-        self.__model.export_clustering_report( )
+        fin = self.__show_save_dialog( )
+        self.__model.export_clustering_report( fin )
     def __cmd_menu_show_view_original( self ) :
         plt = figure_window( tk.Toplevel( self ), title = u"Исходные данные", modal = True )
         fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )
@@ -117,6 +121,9 @@ class Application( tk.Frame ):
     def __show_open_dialog( self ) :
         return file_dlg.askopenfile(
             filetypes = ( ( "CSV", "*.csv" ), ( "All files", "*.*" ) ) )
+    def __show_save_dialog( self ) :
+        return file_dlg.asksaveasfile( mode = 'w', defaultextension = ".csv" )
+            # filetypes = ( ( "CSV", "*.csv" ), ( "All files", "*.*" ) ) )
 
 ##########################################################################################
 ##########################################################################################
