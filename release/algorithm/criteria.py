@@ -8,6 +8,7 @@ from numpy import argpartition as argtop
 class criterion(object):
 	def __init__(self, data, fun, alpha = .5, p = 2, **kwargs):
 		super(criterion, self).__init__( )
+		print alpha, p
 		sim_matrix = squareform( np.exp( - alpha * ( pdist( data, **kwargs ) ** p ) ) )
 ## Reomve the diagonal, since self-similarity should not contribute to
 ##  the clustering quality criteria.

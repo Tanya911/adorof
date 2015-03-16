@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-__date__            = "2015-03-15"
+__date__            = "2015-03-16"
 __author__          = "Makhalova, Nazarov"
 __email__           = "tpmakhalova@edu.hse.ru, innazarov@edu.hse.ru"
 __status__          = "Alpha"
-__version__         = "0.5"
+__version__         = "0.9"
 __dscription__      = """Основной модуль работы по курсу "Структурно-классификационные методы интеллектуального анализа данных и прогнозирования в слабо формализованных системах" """
 
 import sys
@@ -13,15 +13,12 @@ import time as tm
 
 try :
     import tkinter as tk
-    from tkinter.ttk import Combobox
+    from tkinter.ttk import Combobox, Entry, Button
     from tkinter import filedialog as file_dlg
 except :
     import Tkinter as tk
-    from ttk import Combobox
+    from ttk import Combobox, Entry, Button
     import tkFileDialog as file_dlg
-
-import matplotlib
-matplotlib.use( 'TkAgg' )
 
 ##########################################################################################
 class Combox( Combobox ):
@@ -56,25 +53,24 @@ class Application( tk.Frame ):
         self.__menubar.add_cascade( label = "Данные", underline = 0, menu = m_data )
         m_data.add_command( label = "Загрузить данные", command = self.__cmd_menu_data_open )
         m_data.add_command( label = "Сохранить данные", command = self.__cmd_menu_data_save )
-        # m_data.entryconfig( 0, state = tk.ENABLED )
-        # m_data.entryconfig( 1, state = tk.DISABLED )
+        m_data.entryconfig( 1, state = tk.DISABLED )
 ## Show
         self.__menuitems[ 'show' ] = m_show = tk.Menu( self.__menubar )
         self.__menubar.add_cascade( label = "Просмотр", underline = 0, menu = m_show )
-        m_show.add_command( label = "Сырые данные", command = self.__cmd_menu_show_view )
+        self.__menubar.entryconfig( 2, state = tk.DISABLED )
+        m_show.add_command( label = "Сырые данные", command = self.__cmd_menu_show_view_original )
+        m_show.add_command( label = "Данные без пропусков", command = self.__cmd_menu_show_view_processed )
         m_show.add_separator( )
         m_show.add_command( label = "Результаты", command = self.__cmd_menu_show_results )
         # m_show.entryconfig( 0, state = tk.DISABLED )
         # m_show.entryconfig( 1, state = tk.DISABLED )
+        # m_show.entryconfig( 3, state = tk.DISABLED )
 ## clustering : Add to the main bar
         self.__menuitems[ 'clustering' ] = m_clust = tk.Menu( self.__menubar )
         self.__menubar.add_cascade( label = "Кластеризация", underline = 0, menu = m_clust )
-        # self.__menubar.entryconfig( 2, state = tk.DISABLED )
-        m_clust.add_command( label = "Настройка...", command = self.__cmd_menu_cluster_setup )
-        m_clust.add_separator( )
+        self.__menubar.entryconfig( 3, state = tk.DISABLED )
         m_clust.add_command( label = "Запуск", command = self.__cmd_menu_cluster_run )
-        # m_show.entryconfig( 0, state = tk.DISABLED )
-        # m_show.entryconfig( 1, state = tk.DISABLED )
+        # m_clust.entryconfig( 0, state = tk.DISABLED )
 ## Initialize the controller
         self.__model.start( )
 ## Invoke the dispatcher
@@ -84,35 +80,35 @@ class Application( tk.Frame ):
         self.quit( )
     def __cmd_menu_data_open( self ) :
         fin = self.__show_open_dialog( )
-        # try :
         self.__model.load_datafile( fin )
         self.__display_show_datafile( )
-        # except Exception, e:
-            # self.__display_error( e.value )
-        # finally :
         fin.close( )
     def __cmd_menu_data_save( self ) :
         pass
-    def __cmd_menu_show_view( self ) :
-        self.__model.show_data( )
+    def __cmd_menu_show_view_original( self ) :
+        plt = figure_window( tk.Toplevel( self ), title = u"Исходные данные", modal = True )
+        fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )
+        self.__model.show_data( fig, original = True )
+    def __cmd_menu_show_view_processed( self ) :
+        plt = figure_window( tk.Toplevel( self ), title = u"Данные без пропусков", modal = True )
+        fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )
+        self.__model.show_data( fig, original = False )
     def __cmd_menu_show_results( self ) :
-        pass
-    def __cmd_menu_cluster_setup( self ) :
-        setup_window( tk.Toplevel( self ), self.__model ).start( )
+        result_window( tk.Toplevel( self ), self.__model ).start( )
     def __cmd_menu_cluster_run( self ) :
-        pass
+        clustering_window( tk.Toplevel( self ), self.__model ).start( )
     def __display_show_datafile( self ) :
-        if not self.__model.has_data( ) :
-            self.__display_error( "NODATA" )
-            return
+        if not self.__model.has_data( ) : return
 ## Show basic info on the loaded datafile
         filename, n, attr = self.__model.get_data_info( )
-        tk.Label( self.__wnd, text = u"Загруженны данные из файла %s" % filename ).grid( row = 0, sticky = tk.W )
+        tk.Label( self.__wnd, text = u"Загружены данные из файла %s" % filename ).grid( row = 0, sticky = tk.W )
         tk.Label( self.__wnd, text = u"Количество объектов: %d" % n ).grid( row = 1, sticky = tk.W )
         tk.Label( self.__wnd, text = u"Количество признаков: %d" % attr ).grid( row = 2, sticky = tk.W )
 ## Enable menu options
-        self.__menuitems[ 'show' ].entryconfig( 0, state = tk.ACTIVE )
-        self.__menubar.entryconfig( 2,state = tk.ACTIVE )
+        # self.__menuitems[ 'show' ].entryconfig( 0, state = tk.ACTIVE )
+        # self.__menuitems[ 'show' ].entryconfig( 1, state = tk.ACTIVE )
+        self.__menubar.entryconfig( 2, state = tk.ACTIVE )
+        self.__menubar.entryconfig( 3, state = tk.ACTIVE )
     def __display_error( self, error ) :
         err_wnd = tk.Toplevel( self )
         err_wnd.geometry( '{}x{}'.format( 300, 40 ) )
@@ -123,23 +119,34 @@ class Application( tk.Frame ):
             filetypes = ( ( "CSV", "*.csv" ), ( "All files", "*.*" ) ) )
 
 ##########################################################################################
-class log_window( tk.Frame ):
-    def __init__(self, hWnd, log ):
+##########################################################################################
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D
+class figure_window( tk.Frame ):
+    def __init__(self, hWnd, title, modal = False ):
         tk.Frame.__init__( self, hWnd )
+        hWnd.title( title )
+        hWnd.resizable( False, False )
+        if modal:
+            hWnd.grab_set( )
+        hWnd.bind( '<Escape>', self.__close )
         self.__wnd = hWnd
-        self.__log = log
-        self.start( )
-    def start( self ) :
-        self.__wnd.title( "Лог работы" )
-        self.__wnd.geometry( '{}x{}'.format( 300, 100 ) )
-        self.__wnd.resizable( False, False )
-    def hide( self ) :
-        pass
-    def show( self ) :
-        pass
+        self.__figure = None
+    def figure( self, **kwargs ) :
+        self.__figure = Figure( **kwargs )
+        canvas = FigureCanvasTkAgg( self.__figure, master = self.__wnd )
+        canvas._tkcanvas.pack( side = tk.TOP, fill = tk.BOTH, expand = 1 )
+        canvas.show( )
+        ax = Axes3D( self.__figure )
+        ax.mouse_init( )
+        return self.__figure
+    def __close( self, event ) :
+        self.__wnd.destroy( )
 
 ##########################################################################################
-class setup_window( tk.Frame ):
+##########################################################################################
+class result_window( tk.Frame ):
     def __init__(self, hWnd, model, callback = None ):
         tk.Frame.__init__( self, hWnd )
         self.__wnd = hWnd
@@ -150,18 +157,98 @@ class setup_window( tk.Frame ):
         if not self.__model.has_data( ) :
             self.__wnd.destroy( )
             return
-        self.__wnd.title( "Настройка параметров кластеризации" )
-        self.__wnd.geometry( '{}x{}'.format( 300, 100 ) )
+        self.__model.setup_begin()
+        self.__wnd.title( u"Результаты кластеризации" )
+        self.__wnd.geometry( '{}x{}+50+50'.format( 380, 120 ) )
         self.__wnd.resizable( False, False )
+        self.__wnd.grab_set( )
+        self.__wnd.bind( '<Escape>', self.__close )
+## The number of classes
+        cls_num = self.__model.read_number_of_classes( )
+        classes = range( cls_num ) ; labels = [ str( c + 1 ) for c in classes ]
+        self.cur_class = Combox( classes, labels, master = self.__wnd, width = 5, state = 'readonly' )
+        tk.Label( self.__wnd, text = "Класс:" ).grid( row = 1, column = 0, sticky = tk.W )
+        self.cur_class.grid( row = 1, column = 1, sticky = tk.W )
+        self.cur_class.set( labels[-1] )
+        self.cur_class.bind( '<<ComboboxSelected>>', self.__onChoice )
+    def __close( self, event ) :
+        self.__wnd.destroy( )
+    def __onChoice( self, event ) :
+        title = u"Класс #{}".format( self.cur_class.current( ) + 1 )
+        plt = figure_window( tk.Toplevel( self ), title = title, modal = False )
+        fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )
+        self.__model.show_cluster( fig, self.cur_class.current( ) )
+
+##########################################################################################
+##########################################################################################
+class clustering_window( tk.Frame ):
+    def __init__(self, hWnd, model, callback = None ):
+        tk.Frame.__init__( self, hWnd )
+        self.__wnd = hWnd
+        self.__callback = None
+        self.__model = model
+        self.start( )
+    def start( self ) :
+        if not self.__model.has_data( ) :
+            self.__wnd.destroy( )
+            return
+        self.__model.setup_begin()
+        self.__wnd.title( u"Кластеризации" )
+        self.__wnd.geometry( '{}x{}+50+50'.format( 380, 150 ) )
+        self.__wnd.resizable( False, False )
+        self.__wnd.bind( '<Escape>', lambda e: self.onClose( ) )
         self.__wnd.protocol( "WM_DELETE_WINDOW", self.onClose  )
-## Put the combobox in its rightful place
-        classes = range( *self.__model.get_class_range( ) )
-        self.combobox = Combox( classes, [ str( i ) for i in classes ], master = self.__wnd, height = 5 )
-        tk.Label( self.__wnd, text = "Количество классов при начальном разбиении:" ).grid( row = 1, sticky = tk.W )
-        self.combobox.grid( row = 2, sticky = tk.W )
-        self.combobox.set( 2 )
+        self.__wnd.grab_set( )
+## The number of classes
+        cls_id, cls_label = self.__model.get_avaliable_classes( )
+        self.num_classes = Combox( cls_id, cls_label , master = self.__wnd, width = 5, state = 'readonly' )
+        tk.Label( self.__wnd, text = "Количество классов:"
+            ).grid( row = 1, column = 0, sticky = tk.W )
+        self.num_classes.grid( row = 1, column = 1, sticky = tk.W )
+        cls_num = self.__model.read_number_of_classes( )-min(cls_id)
+        if cls_num < 1 :
+            cls_num = -1
+        self.num_classes.set( cls_label[ cls_num ] )
+## The target criterion
+        crit_id, crit_label = self.__model.get_avaliable_criteria( )
+        self.crit_fun = Combox( crit_id, crit_label, master = self.__wnd, width = 12, state = 'readonly' )
+        tk.Label( self.__wnd, text = "Критерий качества:"
+            ).grid( row = 3, column = 0, sticky = tk.W )
+        self.crit_fun.grid( row = 3, column = 1, sticky = tk.W )
+        self.crit_fun.set( crit_label[-1] )
+## The similarity matrix parameters
+        self.alpha_box = Entry( master = self.__wnd, width = 5 )
+        tk.Label( self.__wnd, text = "Параметр Альфа:"
+            ).grid( row = 4, column = 0, sticky = tk.W )
+        self.alpha_box.grid( row = 4, column = 1, sticky = tk.W )
+        alpha = self.__model.read_alpha( )
+        self.alpha_box.insert( 0, ".5" if alpha is None else str( alpha ) )
+        self.p_box = Entry( master = self.__wnd, width = 5 )
+        tk.Label( self.__wnd, text = "Параметр P:"
+            ).grid( row = 5, column = 0, sticky = tk.W )
+        self.p_box.grid( row = 5, column = 1, sticky = tk.W )
+        p = self.__model.read_p( )
+        self.p_box.insert( 0, "8" if p is None else str( p ) )
+## The optimisation parameter
+        m_par_id, m_par_label = self.__model.get_m_param_values( )
+        self.m_param = Combox( m_par_id, m_par_label , master = self.__wnd, width = 5, state = 'normal' )
+        tk.Label( self.__wnd, text = "Параметр m-локальной оптимизации:"
+            ).grid( row = 6, column = 0, sticky = tk.W )
+        self.m_param.grid( row = 6, column = 1, sticky = tk.W )
+        m_par = self.__model.read_m_param( )
+        self.m_param.set( m_par_label[-1] if m_par is None else str( m_par ) )
+## Add a button to start
+        self.submit = Button( master = self.__wnd, width = 12,
+            state = tk.ACTIVE, text = u"Запуск", command = self.onClose )
+        self.submit.grid( row = 7, column = 1, sticky = tk.W )
     def onClose( self ) :
-        print self.combobox.current( )
+        self.__model.select_number_of_classes( self.num_classes.current( ) )
+        self.__model.select_criterion( self.crit_fun.current( ) )
+        self.__model.set_alpha( self.alpha_box.get( ) )
+        self.__model.set_p( self.p_box.get( ) )
+        self.__model.set_m_param( self.m_param.current( ) )
+        self.__model.setup_end( )
+        self.__model.run_cluster( )
         self.__wnd.destroy( )
 
 ##########################################################################################

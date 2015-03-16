@@ -96,4 +96,4 @@ class m_local(object) :
 				continue
 ## Restart from the very beginning
 			V0 = V1 ; s = 1
-		return V0
+		return partition
