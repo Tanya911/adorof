@@ -122,8 +122,8 @@ class Application( tk.Frame ):
         return file_dlg.askopenfile(
             filetypes = ( ( "CSV", "*.csv" ), ( "All files", "*.*" ) ) )
     def __show_save_dialog( self ) :
-        return file_dlg.asksaveasfile( mode = 'w', defaultextension = ".csv" )
-            # filetypes = ( ( "CSV", "*.csv" ), ( "All files", "*.*" ) ) )
+        return file_dlg.asksaveasfile( mode = 'w',
+			filetypes = ( ( u"Книга Excel 97-2003", "*.xls" ), ( "All files", "*.*" ) ) )
 
 ##########################################################################################
 ##########################################################################################

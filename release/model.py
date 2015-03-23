@@ -11,6 +11,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plotter
 import numpy as np
 import FillGaps as fg
+import xlwt
 
 from algorithm import initial as ini
 from algorithm import criteria as crit
@@ -64,29 +65,79 @@ class model( object ):
                 obj_class[cl[j]]=i
 ## Write original data (from datafile)
         # with open('results.csv', 'w') as fp:
-        fp.writelines(u'Исходные данные\n')
-        for member in range(len(self.__original[0])):
-            fp.write('\tx{:d};'.format(member+1))
-        fp.write('\n')
-        for i in self.__original:
-            for j in i:
-                fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
-            fp.write('\n')
-        fp.write('\n')
+		n_rows = self.__original.shape[0]
+		n_columns = self.__original.shape[1]
+		# preparation to writing 
+		font = xlwt.Font()
+		font.bold = True
+		alignment = xlwt.Alignment()
+		alignment.horz = xlwt.Alignment.HORZ_CENTER
+		header_style = xlwt.XFStyle() 
+		header_style.font = font 
+		header_style.alignment = alignment 
+		header_style1 = xlwt.XFStyle() 
+		header_style1.font = font 
+		style_float = xlwt.XFStyle()
+		style_float.num_format_str = '#,##0.000'
+		
+		# writeng to xls
+		wb = xlwt.Workbook(encoding='utf-8')
+		# Data output
+		sheet0 = wb.add_sheet(u'Анализируемые данные')
+		sheet0.write_merge(0, 0, 0, n_columns - 1, u'Исходные данные', header_style) 
+		for i in range(n_rows):
+			for j in range(n_columns):
+				if np.isnan(self.__original[i][j]):
+					sheet0.write(i + 1, j, '')
+				else:
+					sheet0.write(i + 1, j, self.__original[i][j],style_float)
+		sheet0.write_merge(0, 0, n_columns + 1, 2 * n_columns, u'Данные без пропусков', header_style) 
+		for i in range(n_rows):
+			for j in range(n_columns):
+				sheet0.write(i + 1, n_columns + 1 + j, self.__dataset[i][j],style_float)
+		sheet0.write(0,2 * n_columns + 1, u'Номер кластера', header_style1)
+		for i in range(n_rows):
+			sheet0.write(i + 1 ,2 * n_columns + 1, j)
+		# Clustering summary
+		sheet1 = wb.add_sheet(u'Результаты кластеризации')
+		sheet1.write_merge(0, 0, 0, 10, u'Параметры кластеризации', header_style) 
+		sheet1.write(1,0,u'Количество кластеров: {:1d}'.format(self.__num_classes))
+		if (self.__clust_criterion == "sim_diff"):
+			sheet1.write(2,0, u'Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне)')
+		else:
+			sheet1.write(2,0, u'Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме')      
+		sheet1.write(3,0,u'Параметр альфа: {:.2f}'.format( self.__alpha))
+		sheet1.write(4,0,u'Параметр p: {:.2f}'.format( self.__p))
+		sheet1.write_merge(5, 5, 0, 10, u'Центроиды', header_style)
+		sheet1.write(6,0, u'Номер', header_style1)
+		sheet1.write(6,1, u'Среднее', header_style1)
+		sheet1.write(6,2, u'Ст. отклонение', header_style1)    
+		
+		wb.save(fp.name) 
+
+#		fp.writelines(u'Исходные данные\n')
+#        for member in range(len(self.__original[0])):
+#           fp.write('\tx{:d};'.format(member+1))
+#        fp.write('\n')
+#        for i in self.__original:
+#            for j in i:
+#               fp.write(str.format("{0:.3f}", j).replace('.',',')+';')
+#            fp.write('\n')
+#        fp.write('\n')
 ### Write results of clustering
-        fp.write('Параметры кластеризации\n'.encode('utf-8'))
-        fp.write(('Количество кластеров: {:1d}.\n'.format(self.__num_classes)).encode('utf-8'))
-        if (self.__clust_criterion == "sim_diff"):
-            fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне).\n').encode('utf-8'))
-        else:
-            fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме.\n').encode('utf-8'))
-        fp.write(('Параметр альфа: {:.2f}.\n'.format( self.__alpha)).encode('utf-8'))
-        fp.write(('Параметр p: {:.2f}.\n'.format( self.__p)).encode('utf-8'))
-        fp.write('Данные кластеризации (с заполненными пропусками)\n'.encode('utf-8'))
-        for i in range(len(self.__dataset)):
-            for j in self.__dataset[i]:
-                fp.write(str.format("{0:.3f}", j).replace('.',',')+';'+str(obj_class[i])+';')
-            fp.write('\n')
+#        fp.write('Параметры кластеризации\n'.encode('utf-8'))
+#        fp.write(('Количество кластеров: {:1d}.\n'.format(self.__num_classes)).encode('utf-8'))
+#        if (self.__clust_criterion == "sim_diff"):
+#            fp.write(('Критерий качества разбиения: разность мер удаленности точек (внутри классов и вне).\n').encode('utf-8'))
+#        else:
+#            fp.write(('Критерий качества разбиения: отношение раззности мер удаленности точек (внутри классов и вне) к их сумме.\n').encode('utf-8'))
+#        fp.write(('Параметр альфа: {:.2f}.\n'.format( self.__alpha)).encode('utf-8'))
+#        fp.write(('Параметр p: {:.2f}.\n'.format( self.__p)).encode('utf-8'))
+#        fp.write('Данные кластеризации (с заполненными пропусками)\n'.encode('utf-8'))
+#        for i in range(len(self.__dataset)):
+#            for j in self.__dataset[i]:
+#                fp.write(str.format("{0:.3f}", j).replace('.',',')+';'+str(obj_class[i])+';')
+#            fp.write('\n')
     def __call__( self ) :
         return self.__dataset
     def get_data_info( self ) :
