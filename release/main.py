@@ -49,7 +49,7 @@ class Application( tk.Frame ):
         self.__menubar = tk.Menu( self.__wnd, tearoff = 0 )
         self.__wnd.config( menu = self.__menubar )
 ## Exit
-        self.__menubar.add_command( label = "Выход", underline = 0, command = self.__cmd_menu_exit )
+        # self.__menubar.add_command( label = "Выход", underline = 0, command = self.__cmd_menu_exit )
 ## Data
         self.__menuitems[ 'data' ] = m_data = tk.Menu( self.__menubar )
         self.__menubar.add_cascade( label = "Данные", underline = 0, menu = m_data )
@@ -59,7 +59,7 @@ class Application( tk.Frame ):
 ## Show
         self.__menuitems[ 'show' ] = m_show = tk.Menu( self.__menubar )
         self.__menubar.add_cascade( label = "Просмотр", underline = 0, menu = m_show )
-        self.__menubar.entryconfig( 2, state = tk.DISABLED )
+        # self.__menubar.entryconfig( 2, state = tk.DISABLED )
         m_show.add_command( label = "Сырые данные", command = self.__cmd_menu_show_view_original )
         m_show.add_command( label = "Данные без пропусков", command = self.__cmd_menu_show_view_processed )
         m_show.add_separator( )
@@ -70,7 +70,7 @@ class Application( tk.Frame ):
 ## clustering : Add to the main bar
         self.__menuitems[ 'clustering' ] = m_clust = tk.Menu( self.__menubar )
         self.__menubar.add_cascade( label = "Кластеризация", underline = 0, menu = m_clust )
-        self.__menubar.entryconfig( 3, state = tk.DISABLED )
+        # self.__menubar.entryconfig( 3, state = tk.DISABLED )
         m_clust.add_command( label = "Запуск", command = self.__cmd_menu_cluster_run )
         # m_clust.entryconfig( 0, state = tk.DISABLED )
 ## Initialize the controller
@@ -111,8 +111,8 @@ class Application( tk.Frame ):
 ## Enable menu options
         # self.__menuitems[ 'show' ].entryconfig( 0, state = tk.ACTIVE )
         # self.__menuitems[ 'show' ].entryconfig( 1, state = tk.ACTIVE )
-        self.__menubar.entryconfig( 2, state = tk.ACTIVE )
-        self.__menubar.entryconfig( 3, state = tk.ACTIVE )
+        # self.__menubar.entryconfig( 2, state = tk.ACTIVE )
+        # self.__menubar.entryconfig( 3, state = tk.ACTIVE )
     def __display_error( self, error ) :
         err_wnd = tk.Toplevel( self )
         err_wnd.geometry( '{}x{}'.format( 300, 40 ) )
@@ -182,6 +182,9 @@ class result_window( tk.Frame ):
         self.__wnd.destroy( )
     def __onChoice( self, event ) :
         title = u"Класс #{}".format( self.cur_class.current( ) + 1 )
+        size, miss, cent = self.__model.get_cluster_info( self.cur_class.current( ) )
+        tk.Label( self.__wnd, text = u"Точек в классе %d" % size ).grid( row = 2, column = 0, sticky = tk.W )
+        tk.Label( self.__wnd, text = u"Реконструировано точек %d" % miss ).grid( row = 3, column = 0, sticky = tk.W )
         plt = figure_window( tk.Toplevel( self ), title = title, modal = False )
         fig = plt.figure( figsize = ( 8, 6 ), facecolor = 'w', dpi = 90 )
         self.__model.show_cluster( fig, self.cur_class.current( ) )
