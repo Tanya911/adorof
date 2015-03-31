@@ -112,23 +112,23 @@ class model( object ):
         sheet1.write(4,0,u'Параметр p: {:.2f}'.format( self.__p))
         sheet1.write(5,0,u'Количество перебросов : {:d}'.format( self.__xfer_count ))
         sheet1.write(6,0,u'Максимальное количество точек при перебросе : {:d}'.format( self.__actual_m ))
-        sheet1.write_merge(7,8,0,0, u'Номер', header_style1)
-        sheet1.write_merge(7,8,1,1, u'Среднее', header_style1)
-        sheet1.write_merge(7,8,2,2, u'Ст. отклонение', header_style1)
-        sheet1.write_merge(7,8,3,3, u'Объём', header_style1)
-        sheet1.write_merge(7, 7, 4, 4 + n_columns-1, u'Центроиды', header_style)
+        sheet1.write_merge(7, 8, 0, 0, u'Номер', header_style1)
+        sheet1.write_merge(7, 8, 1, 1, u'Объём', header_style1)
+        sheet1.write_merge(7, 7, 2, 2 + n_columns-1, u'Центроиды', header_style)
+        sheet1.write_merge(7, 7, 2 + n_columns, 2 + 2*n_columns-1, u'ст. отклонение', header_style)
         for j in range( n_columns ) :
-            sheet1.write(8, 4 + j, u'X%d'%j)
+            sheet1.write(8, 2 + j, u'X%d'%j)
+            sheet1.write(8, 2 + n_columns + j, u'X%d'%j)
         for i in range(len(self.__current_partition)):
             cl = self.__current_partition[ i ]
             cluster = self.__dataset[ cl ]
             sheet1.write(9 + i, 0, i+1)
-            # sheet1.write(9 + i, 1, u'Не применимо')
-            # sheet1.write(9 + i, 2, u'Не применимо')
-            sheet1.write(9 + i, 3, len( cl ) )
+            sheet1.write(9 + i, 1, len( cl ) )
             centroid = np.mean( cluster, axis = 0 )
+            sdev = np.std( cluster-centroid, axis = 0 )
             for j in range( n_columns ) :
-                sheet1.write(9 + i, 4 + j, centroid[ j ], style_float)
+                sheet1.write(9 + i, 2 + j, centroid[ j ], style_float)
+                sheet1.write(9 + i, n_columns + 2 + j, sdev[ j ], style_float)
         wb.save(fp.name) 
 
 #		fp.writelines(u'Исходные данные\n')
