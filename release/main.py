@@ -73,6 +73,11 @@ class Application( tk.Frame ):
         # self.__menubar.entryconfig( 3, state = tk.DISABLED )
         m_clust.add_command( label = "Запуск", command = self.__cmd_menu_cluster_run )
         # m_clust.entryconfig( 0, state = tk.DISABLED )
+## About : Add to the main bar
+        self.__menuitems[ 'about' ] = m_about = tk.Menu( self.__menubar )
+        self.__menubar.add_cascade( label = "Помощь", underline = 0, menu = m_about )
+        m_about.add_command( label = "о программе", command = self.__show_about_dialog )
+        m_about.add_command( label = "руководство пользователя", command = self.__show_manual )
 ## Initialize the controller
         self.__model.start( )
 ## Invoke the dispatcher
@@ -124,6 +129,40 @@ class Application( tk.Frame ):
     def __show_save_dialog( self ) :
         return file_dlg.asksaveasfile( mode = 'w',
 			filetypes = ( ( u"Книга Excel 97-2003", "*.xls" ), ( "All files", "*.*" ) ) )
+    def __show_about_dialog( self ) :
+        about = about_window( tk.Toplevel( self ), title = u"о программе", modal = True )
+        about.show( )
+    def __show_manual( self ) :
+        import os
+        import win32com.client as win32
+        if os.name == 'nt' :
+            word = win32.gencache.EnsureDispatch( 'Word.Application' )
+            word.Documents.Open( os.path.join( os.path.realpath( '.' ),
+                u"Руководство пользователя программы анализа данных.docx" ) )
+            word.Visible = True
+
+
+##########################################################################################
+##########################################################################################
+class about_window( tk.Frame ):
+    def __init__(self, hWnd, title, modal = False ):
+        tk.Frame.__init__( self, hWnd )
+        hWnd.title( title )
+        hWnd.geometry( '{}x{}+50+50'.format( 363, 120 ) )
+        hWnd.resizable( False, False )
+        if modal:
+            hWnd.grab_set( )
+        hWnd.bind( '<Escape>', self.__close )
+        self.__wnd = hWnd
+    def show( self, **kwargs ) :
+## The number of classes
+        tk.Label( self.__wnd, text = "Авторы:" ).grid( row = 1, column = 0, sticky = tk.W )
+        tk.Label( self.__wnd, text = __email__ ).grid( row = 1, column = 1, sticky = tk.W )
+        T = tk.Text( self.__wnd, height = 9, width = 45 )
+        T.grid( row = 2, column = 0, columnspan = 2, sticky = tk.W )
+        T.insert( tk.END, __dscription__ + u"\nАвторы: " + __email__ )
+    def __close( self, event ) :
+        self.__wnd.destroy( )
 
 ##########################################################################################
 ##########################################################################################
@@ -265,4 +304,4 @@ class clustering_window( tk.Frame ):
 if __name__ == '__main__' :
     from model import model as mdl
     Application( tk.Tk( ), mdl( ) ).start( )
-    exit( 0 )
+    sys.exit( 0 )
